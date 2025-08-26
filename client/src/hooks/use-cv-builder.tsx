@@ -57,7 +57,7 @@ export function useCvBuilder() {
 
   // Update state when session data changes
   useEffect(() => {
-    if (session) {
+    if (session && session.cvData) {
       setCvData(session.cvData as CvData);
       setCurrentStep(session.currentStep as Step);
       setCurrentSubStep(session.currentSubStep as SubStep);

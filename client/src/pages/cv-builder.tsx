@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCvBuilder } from "@/hooks/use-cv-builder";
 import { ProgressSteps } from "@/components/cv-builder/progress-steps";
 import { SubSteps } from "@/components/cv-builder/sub-steps";
@@ -10,6 +10,7 @@ import { SkillsForm } from "@/components/cv-builder/skills-form";
 import { CvPreview } from "@/components/cv-builder/cv-preview";
 import { PremiumFeatures } from "@/components/cv-builder/premium-features";
 import { ProcessingStatus } from "@/components/cv-builder/processing-status";
+import { HeroIntro } from "@/components/cv-builder/hero-intro";
 
 export default function CvBuilder() {
   const {
@@ -25,10 +26,27 @@ export default function CvBuilder() {
     goToStep,
     goToSubStep,
   } = useCvBuilder();
+  
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
+    // Don't initialize session until user clicks "Get Started"
+  }, []);
+
+  const handleGetStarted = () => {
+    setShowIntro(false);
     initializeSession();
-  }, [initializeSession]);
+  };
+
+  if (showIntro) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-16">
+          <HeroIntro onGetStarted={handleGetStarted} />
+        </div>
+      </div>
+    );
+  }
 
   if (!session) {
     return (
@@ -38,19 +56,39 @@ export default function CvBuilder() {
     );
   }
 
+  // Check if current step is complete
+  const isStepComplete = () => {
+    if (!cvData) return false;
+    
+    switch (currentSubStep) {
+      case "personal-info":
+        return cvData.personalInfo?.fullName && cvData.personalInfo?.title && 
+               cvData.personalInfo?.email && cvData.personalInfo?.phone && 
+               cvData.personalInfo?.location;
+      case "experience":
+        return cvData.experiences && cvData.experiences.length > 0;
+      case "education":
+        return cvData.education && cvData.education.length > 0;
+      case "skills":
+        return cvData.skills && cvData.skills.length > 0;
+      default:
+        return false;
+    }
+  };
+
   const renderCurrentForm = () => {
-    if (currentStep === "fill-form") {
+    if (currentStep === "fill-form" && cvData) {
       switch (currentSubStep) {
         case "personal-info":
-          return <PersonalInfoForm data={cvData.personalInfo} onUpdate={(data) => updateCvData({ personalInfo: data })} />;
+          return <PersonalInfoForm data={cvData.personalInfo || { fullName: "", title: "", email: "", phone: "", location: "", summary: "" }} onUpdate={(data) => updateCvData({ personalInfo: data })} />;
         case "experience":
-          return <ExperienceForm data={cvData.experiences} onUpdate={(data) => updateCvData({ experiences: data })} />;
+          return <ExperienceForm data={cvData.experiences || []} onUpdate={(data) => updateCvData({ experiences: data })} />;
         case "education":
-          return <EducationForm data={cvData.education} onUpdate={(data) => updateCvData({ education: data })} />;
+          return <EducationForm data={cvData.education || []} onUpdate={(data) => updateCvData({ education: data })} />;
         case "skills":
-          return <SkillsForm data={cvData.skills} onUpdate={(data) => updateCvData({ skills: data })} />;
+          return <SkillsForm data={cvData.skills || []} onUpdate={(data) => updateCvData({ skills: data })} />;
         default:
-          return <PersonalInfoForm data={cvData.personalInfo} onUpdate={(data) => updateCvData({ personalInfo: data })} />;
+          return <PersonalInfoForm data={cvData.personalInfo || { fullName: "", title: "", email: "", phone: "", location: "", summary: "" }} onUpdate={(data) => updateCvData({ personalInfo: data })} />;
       }
     }
     return null;
@@ -95,7 +133,7 @@ export default function CvBuilder() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Forms and Input Methods */}
           <div className="lg:col-span-2 space-y-6">
-            {currentStep === "fill-form" && currentSubStep === "personal-info" && !cvData.personalInfo.fullName && (
+            {currentStep === "fill-form" && currentSubStep === "personal-info" && (!cvData?.personalInfo?.fullName) && (
               <InputMethods onDataImported={updateCvData} />
             )}
             
@@ -113,7 +151,8 @@ export default function CvBuilder() {
               </button>
               <button 
                 onClick={nextStep}
-                className="px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                disabled={!isStepComplete()}
+                className="px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
                 data-testid="button-next"
               >
                 Continue
@@ -124,7 +163,7 @@ export default function CvBuilder() {
 
           {/* Right Column: Preview and Premium Features */}
           <div className="space-y-6">
-            <CvPreview cvData={cvData} isWatermarked={!session?.isPaid} />
+            <CvPreview cvData={cvData || { personalInfo: { fullName: "", title: "", email: "", phone: "", location: "", summary: "" }, experiences: [], education: [], skills: [] }} isWatermarked={!session?.isPaid} />
             
             {!session?.isPaid && <PremiumFeatures sessionToken={session?.sessionToken || ""} />}
             
