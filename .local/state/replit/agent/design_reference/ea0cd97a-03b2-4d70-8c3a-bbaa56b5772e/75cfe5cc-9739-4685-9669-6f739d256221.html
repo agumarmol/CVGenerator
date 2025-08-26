@@ -1,0 +1,591 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Builder Pro - Create Professional CVs in Multiple Languages</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    sans: ["Inter", "system-ui", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(210 40% 96%);
+            --foreground: hsl(210 20% 12%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(210 20% 12%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(210 20% 12%);
+            --primary: hsl(217 91% 60%);
+            --primary-foreground: hsl(0 0% 100%);
+            --secondary: hsl(210 40% 92%);
+            --secondary-foreground: hsl(210 20% 18%);
+            --muted: hsl(210 40% 92%);
+            --muted-foreground: hsl(210 20% 50%);
+            --accent: hsl(157 70% 50%);
+            --accent-foreground: hsl(0 0% 100%);
+            --destructive: hsl(0 72% 51%);
+            --destructive-foreground: hsl(0 0% 100%);
+            --border: hsl(214 32% 91%);
+            --input: hsl(214 32% 91%);
+            --ring: hsl(217 91% 60%);
+            --radius: 0.5rem;
+        }
+        
+        .step-indicator {
+            position: relative;
+        }
+        
+        .step-indicator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 100%;
+            height: 2px;
+            background-color: var(--border);
+            transform: translateY(-50%);
+        }
+        
+        .step-indicator:last-child::after {
+            display: none;
+        }
+        
+        .step-indicator.active::after {
+            background-color: var(--primary);
+        }
+        
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cv-preview {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            min-height: 800px;
+        }
+        
+        @media (max-width: 1024px) {
+            .split-layout {
+                flex-direction: column;
+            }
+            
+            .form-section {
+                order: 2;
+            }
+            
+            .preview-section {
+                order: 1;
+                min-height: 400px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-background text-foreground font-sans">
+    <!-- Header -->
+    <header class="bg-card border-b border-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                        <i class="fas fa-file-text text-primary-foreground text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-foreground">CV Builder Pro</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Language Selector -->
+                    <!-- @COMPONENT: LanguageSelector [currentLang, onLanguageChange] -->
+                    <div class="relative">
+                        <button class="flex items-center space-x-2 px-3 py-2 border border-border rounded-md bg-card text-sm hover:bg-secondary transition-colors">
+                            <i class="fas fa-globe text-muted-foreground"></i>
+                            <span data-bind="selectedLanguage">English</span>
+                            <i class="fas fa-chevron-down text-xs text-muted-foreground"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-32 bg-popover border border-border rounded-md shadow-lg z-50 hidden">
+                            <button class="w-full text-left px-3 py-2 text-sm hover:bg-secondary">English</button>
+                            <button class="w-full text-left px-3 py-2 text-sm hover:bg-secondary">Español</button>
+                            <button class="w-full text-left px-3 py-2 text-sm hover:bg-secondary">Français</button>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: LanguageSelector -->
+                    
+                    <button class="px-4 py-2 bg-accent text-accent-foreground rounded-md hover:bg-accent/90 transition-colors font-medium">
+                        <i class="fas fa-download mr-2"></i>
+                        Download PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Steps -->
+    <div class="bg-card border-b border-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <!-- @COMPONENT: StepIndicator [currentStep, steps, onStepChange] -->
+            <div class="flex items-center justify-between max-w-2xl mx-auto">
+                <div class="flex items-center step-indicator active">
+                    <div class="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium mr-3">1</div>
+                    <span class="text-sm font-medium text-primary">Template</span>
+                </div>
+                <div class="flex items-center step-indicator">
+                    <div class="w-8 h-8 bg-muted text-muted-foreground rounded-full flex items-center justify-center text-sm font-medium mr-3">2</div>
+                    <span class="text-sm text-muted-foreground">Personal Info</span>
+                </div>
+                <div class="flex items-center step-indicator">
+                    <div class="w-8 h-8 bg-muted text-muted-foreground rounded-full flex items-center justify-center text-sm font-medium mr-3">3</div>
+                    <span class="text-sm text-muted-foreground">Experience</span>
+                </div>
+                <div class="flex items-center step-indicator">
+                    <div class="w-8 h-8 bg-muted text-muted-foreground rounded-full flex items-center justify-center text-sm font-medium mr-3">4</div>
+                    <span class="text-sm text-muted-foreground">Education</span>
+                </div>
+                <div class="flex items-center step-indicator">
+                    <div class="w-8 h-8 bg-muted text-muted-foreground rounded-full flex items-center justify-center text-sm font-medium mr-3">5</div>
+                    <span class="text-sm text-muted-foreground">Skills</span>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: StepIndicator -->
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex split-layout">
+        <!-- Form Section -->
+        <div class="w-full lg:w-1/2 p-6 bg-background form-section">
+            <div class="max-w-2xl mx-auto">
+                <!-- Step 1: Template Selection -->
+                <!-- @COMPONENT: TemplateSelector [templates, selectedTemplate, onTemplateSelect] -->
+                <div class="bg-card rounded-lg p-6 shadow-sm border border-border">
+                    <h2 class="text-xl font-semibold mb-2">Choose Your CV Template</h2>
+                    <p class="text-muted-foreground text-sm mb-6">Select a professional template that matches your style and industry.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        <!-- Template 1: Modern -->
+                        <div class="template-card bg-card border-2 border-primary rounded-lg p-4 cursor-pointer transition-all duration-200">
+                            <!-- A clean, modern CV template preview with blue accents -->
+                            <div class="aspect-[3/4] bg-gradient-to-br from-blue-50 to-blue-100 rounded-md mb-3 relative overflow-hidden">
+                                <div class="absolute top-3 left-3 right-3">
+                                    <div class="h-2 bg-primary rounded mb-2"></div>
+                                    <div class="h-1 bg-blue-300 rounded w-3/4 mb-4"></div>
+                                    <div class="space-y-1">
+                                        <div class="h-1 bg-blue-200 rounded w-full"></div>
+                                        <div class="h-1 bg-blue-200 rounded w-5/6"></div>
+                                        <div class="h-1 bg-blue-200 rounded w-4/5"></div>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 left-3 right-3">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="space-y-1">
+                                            <div class="h-1 bg-blue-300 rounded w-full"></div>
+                                            <div class="h-1 bg-blue-200 rounded w-3/4"></div>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="h-1 bg-blue-300 rounded w-full"></div>
+                                            <div class="h-1 bg-blue-200 rounded w-2/3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <h3 class="font-medium text-sm mb-1">Modern</h3>
+                                <p class="text-xs text-muted-foreground">Clean & Contemporary</p>
+                            </div>
+                            <div class="absolute top-2 right-2">
+                                <div class="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-primary-foreground text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Template 2: Classic -->
+                        <div class="template-card bg-card border border-border rounded-lg p-4 cursor-pointer transition-all duration-200">
+                            <!-- A traditional, classic CV template preview with serif elements -->
+                            <div class="aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 rounded-md mb-3 relative overflow-hidden">
+                                <div class="absolute top-3 left-3 right-3">
+                                    <div class="h-2 bg-gray-800 rounded-sm mb-2"></div>
+                                    <div class="h-1 bg-gray-500 rounded-sm w-2/3 mb-4"></div>
+                                    <div class="space-y-2">
+                                        <div class="h-1 bg-gray-400 rounded-sm w-full"></div>
+                                        <div class="h-1 bg-gray-400 rounded-sm w-full"></div>
+                                        <div class="h-1 bg-gray-400 rounded-sm w-3/4"></div>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 left-3 right-3 space-y-2">
+                                    <div class="h-1 bg-gray-600 rounded-sm w-1/2"></div>
+                                    <div class="h-1 bg-gray-400 rounded-sm w-full"></div>
+                                    <div class="h-1 bg-gray-400 rounded-sm w-5/6"></div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <h3 class="font-medium text-sm mb-1">Classic</h3>
+                                <p class="text-xs text-muted-foreground">Traditional & Professional</p>
+                            </div>
+                        </div>
+
+                        <!-- Template 3: Creative -->
+                        <div class="template-card bg-card border border-border rounded-lg p-4 cursor-pointer transition-all duration-200">
+                            <!-- A creative CV template preview with colorful design elements -->
+                            <div class="aspect-[3/4] bg-gradient-to-br from-purple-50 to-pink-50 rounded-md mb-3 relative overflow-hidden">
+                                <div class="absolute top-3 left-3 right-3">
+                                    <div class="h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-2"></div>
+                                    <div class="h-1 bg-purple-300 rounded-full w-2/3 mb-4"></div>
+                                    <div class="space-y-1">
+                                        <div class="h-1 bg-pink-300 rounded-full w-full"></div>
+                                        <div class="h-1 bg-purple-300 rounded-full w-4/5"></div>
+                                        <div class="h-1 bg-pink-300 rounded-full w-3/4"></div>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 left-3 right-3">
+                                    <div class="flex space-x-1 mb-2">
+                                        <div class="w-1 h-4 bg-purple-400 rounded-full"></div>
+                                        <div class="w-1 h-3 bg-pink-400 rounded-full"></div>
+                                        <div class="w-1 h-4 bg-purple-300 rounded-full"></div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="h-1 bg-pink-300 rounded-full w-full"></div>
+                                        <div class="h-1 bg-purple-300 rounded-full w-3/4"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <h3 class="font-medium text-sm mb-1">Creative</h3>
+                                <p class="text-xs text-muted-foreground">Bold & Artistic</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Template Options -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-medium mb-2 block">Color Scheme</label>
+                            <div class="flex space-x-2">
+                                <button class="w-8 h-8 rounded-full bg-primary border-2 border-primary"></button>
+                                <button class="w-8 h-8 rounded-full bg-green-500 border-2 border-transparent hover:border-gray-300"></button>
+                                <button class="w-8 h-8 rounded-full bg-purple-500 border-2 border-transparent hover:border-gray-300"></button>
+                                <button class="w-8 h-8 rounded-full bg-red-500 border-2 border-transparent hover:border-gray-300"></button>
+                                <button class="w-8 h-8 rounded-full bg-gray-800 border-2 border-transparent hover:border-gray-300"></button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button class="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Back
+                            </button>
+                            <button class="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium">
+                                Continue
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: TemplateSelector -->
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="w-full lg:w-1/2 bg-secondary p-6 preview-section">
+            <div class="sticky top-6">
+                <div class="bg-card rounded-lg p-4 mb-4 border border-border">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-medium">CV Preview</h3>
+                        <div class="flex items-center space-x-2">
+                            <button class="p-2 hover:bg-secondary rounded-md transition-colors">
+                                <i class="fas fa-search-minus text-muted-foreground"></i>
+                            </button>
+                            <span class="text-sm text-muted-foreground">75%</span>
+                            <button class="p-2 hover:bg-secondary rounded-md transition-colors">
+                                <i class="fas fa-search-plus text-muted-foreground"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- @COMPONENT: CVPreview [formData, selectedTemplate, language] -->
+                <div class="cv-preview rounded-lg overflow-hidden">
+                    <!-- CV Preview Content -->
+                    <div class="h-full bg-white p-8 min-h-[800px]">
+                        <!-- Header Section -->
+                        <div class="border-b-2 border-primary pb-6 mb-6">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2" data-bind="personalInfo.name">John Smith</h1>
+                            <p class="text-lg text-primary font-medium mb-3" data-bind="personalInfo.title">Senior Software Engineer</p>
+                            <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+                                <div class="flex items-center">
+                                    <i class="fas fa-envelope mr-2 text-primary"></i>
+                                    <span data-bind="personalInfo.email">john.smith@email.com</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-phone mr-2 text-primary"></i>
+                                    <span data-bind="personalInfo.phone">+1 (555) 123-4567</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                                    <span data-bind="personalInfo.location">New York, NY</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fab fa-linkedin mr-2 text-primary"></i>
+                                    <span data-bind="personalInfo.linkedin">linkedin.com/in/johnsmith</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Professional Summary -->
+                        <div class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-3 flex items-center">
+                                <div class="w-1 h-6 bg-primary mr-3 rounded"></div>
+                                Professional Summary
+                            </h2>
+                            <p class="text-gray-700 leading-relaxed" data-bind="personalInfo.summary" data-mock="true">
+                                Experienced software engineer with 8+ years of expertise in full-stack development, specializing in React, Node.js, and cloud technologies. Proven track record of leading cross-functional teams and delivering scalable solutions for enterprise applications.
+                            </p>
+                        </div>
+
+                        <!-- Experience -->
+                        <div class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                <div class="w-1 h-6 bg-primary mr-3 rounded"></div>
+                                Work Experience
+                            </h2>
+                            
+                            <!-- @MAP: experience.map(job => ( -->
+                            <div class="mb-4 border-l-2 border-gray-200 pl-4" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900" data-bind="job.title">Senior Software Engineer</h3>
+                                        <p class="text-primary font-medium" data-bind="job.company">TechCorp Solutions</p>
+                                    </div>
+                                    <span class="text-sm text-gray-600" data-bind="job.period">2020 - Present</span>
+                                </div>
+                                <ul class="text-gray-700 text-sm space-y-1">
+                                    <li data-bind="job.achievement1">• Led development of microservices architecture serving 1M+ users</li>
+                                    <li data-bind="job.achievement2">• Improved application performance by 40% through code optimization</li>
+                                    <li data-bind="job.achievement3">• Mentored junior developers and established coding best practices</li>
+                                </ul>
+                            </div>
+
+                            <div class="mb-4 border-l-2 border-gray-200 pl-4" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Software Engineer</h3>
+                                        <p class="text-primary font-medium">Digital Innovations Inc.</p>
+                                    </div>
+                                    <span class="text-sm text-gray-600">2018 - 2020</span>
+                                </div>
+                                <ul class="text-gray-700 text-sm space-y-1">
+                                    <li>• Developed responsive web applications using React and TypeScript</li>
+                                    <li>• Collaborated with design team to implement pixel-perfect UI components</li>
+                                    <li>• Integrated third-party APIs and payment processing systems</li>
+                                </ul>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+
+                        <!-- Education -->
+                        <div class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                <div class="w-1 h-6 bg-primary mr-3 rounded"></div>
+                                Education
+                            </h2>
+                            <div class="border-l-2 border-gray-200 pl-4" data-mock="true">
+                                <div class="flex justify-between items-start mb-1">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900" data-bind="education.degree">Bachelor of Science in Computer Science</h3>
+                                        <p class="text-primary font-medium" data-bind="education.school">Stanford University</p>
+                                    </div>
+                                    <span class="text-sm text-gray-600" data-bind="education.year">2014 - 2018</span>
+                                </div>
+                                <p class="text-gray-700 text-sm" data-bind="education.details">Graduated Magna Cum Laude, GPA: 3.8/4.0</p>
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                <div class="w-1 h-6 bg-primary mr-3 rounded"></div>
+                                Technical Skills
+                            </h2>
+                            <div class="grid grid-cols-2 gap-4" data-mock="true">
+                                <div>
+                                    <h4 class="font-medium text-gray-900 mb-2">Programming Languages</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">JavaScript</span>
+                                        <span class="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">TypeScript</span>
+                                        <span class="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">Python</span>
+                                        <span class="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">Java</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900 mb-2">Frameworks & Tools</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">React</span>
+                                        <span class="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">Node.js</span>
+                                        <span class="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">Docker</span>
+                                        <span class="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded">AWS</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: CVPreview -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border">
+        <div class="flex justify-around py-3">
+            <button class="flex flex-col items-center space-y-1 text-primary">
+                <i class="fas fa-edit text-sm"></i>
+                <span class="text-xs">Edit</span>
+            </button>
+            <button class="flex flex-col items-center space-y-1 text-muted-foreground">
+                <i class="fas fa-eye text-sm"></i>
+                <span class="text-xs">Preview</span>
+            </button>
+            <button class="flex flex-col items-center space-y-1 text-muted-foreground">
+                <i class="fas fa-download text-sm"></i>
+                <span class="text-xs">Download</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // TODO: Implement React components for CV builder functionality
+        // TODO: Add form validation and error handling
+        // TODO: Implement localStorage for session persistence
+        // TODO: Add PDF generation using jsPDF or Puppeteer
+        // TODO: Implement real-time preview updates
+        // TODO: Add internationalization for multiple languages
+
+        (function() {
+            // Language selector dropdown toggle
+            const languageButton = document.querySelector('button[data-bind]');
+            const languageDropdown = languageButton?.nextElementSibling;
+            
+            languageButton?.addEventListener('click', () => {
+                languageDropdown?.classList.toggle('hidden');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!languageButton?.contains(e.target)) {
+                    languageDropdown?.classList.add('hidden');
+                }
+            });
+
+            // Template selection
+            const templateCards = document.querySelectorAll('.template-card');
+            templateCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    templateCards.forEach(c => {
+                        c.classList.remove('border-primary');
+                        c.classList.add('border-border');
+                    });
+                    card.classList.remove('border-border');
+                    card.classList.add('border-primary', 'border-2');
+                });
+            });
+
+            // Color scheme selection
+            const colorButtons = document.querySelectorAll('button[class*="w-8 h-8 rounded-full"]');
+            colorButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    colorButtons.forEach(b => {
+                        b.classList.remove('border-2');
+                        b.classList.add('border-2', 'border-transparent');
+                    });
+                    button.classList.add('border-2');
+                    button.classList.remove('border-transparent');
+                });
+            });
+
+            // Mobile navigation
+            const mobileNavButtons = document.querySelectorAll('.lg\\:hidden button');
+            mobileNavButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    mobileNavButtons.forEach(b => {
+                        b.classList.remove('text-primary');
+                        b.classList.add('text-muted-foreground');
+                    });
+                    button.classList.remove('text-muted-foreground');
+                    button.classList.add('text-primary');
+                });
+            });
+
+            // Zoom controls
+            let zoomLevel = 75;
+            const zoomOutBtn = document.querySelector('.fa-search-minus').parentElement;
+            const zoomInBtn = document.querySelector('.fa-search-plus').parentElement;
+            const zoomDisplay = document.querySelector('.fa-search-minus').parentElement.nextElementSibling;
+            
+            zoomOutBtn?.addEventListener('click', () => {
+                if (zoomLevel > 25) {
+                    zoomLevel -= 25;
+                    zoomDisplay.textContent = `${zoomLevel}%`;
+                    // TODO: Apply zoom to CV preview
+                }
+            });
+
+            zoomInBtn?.addEventListener('click', () => {
+                if (zoomLevel < 150) {
+                    zoomLevel += 25;
+                    zoomDisplay.textContent = `${zoomLevel}%`;
+                    // TODO: Apply zoom to CV preview
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

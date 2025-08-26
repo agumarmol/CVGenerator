@@ -12,7 +12,8 @@ import { cvDataSchema } from "@shared/schema";
 import { enhanceJobDescription, extractCvDataFromText, generatePersonalSummary } from "./services/ai";
 import { extractTextFromPDF, validatePDFFile } from "./services/pdf-parser";
 import { randomBytes } from "crypto";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+// import { setupAuth, isAuthenticated } from "./replitAuth"; // No se usa más
+import { setupAuth, isAuthenticated } from "./auth"; // Reemplaza replitAuth y permite independizar del replit 
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');

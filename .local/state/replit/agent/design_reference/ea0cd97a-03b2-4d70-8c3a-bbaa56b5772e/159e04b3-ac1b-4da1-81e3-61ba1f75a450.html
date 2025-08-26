@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVMaster Pro - AI-Powered CV Generation Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                    chart: {
+                        "1": "var(--chart-1)",
+                        "2": "var(--chart-2)",
+                        "3": "var(--chart-3)",
+                        "4": "var(--chart-4)",
+                        "5": "var(--chart-5)",
+                    }
+                },
+                fontFamily: {
+                    sans: ["Inter", "system-ui", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --radius: 0.5rem;
+            --background: hsl(210 40% 98%);
+            --foreground: hsl(222 20% 15%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(222 20% 15%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(222 20% 15%);
+            --primary: hsl(221 83% 53%);
+            --primary-foreground: hsl(210 40% 98%);
+            --secondary: hsl(210 40% 96%);
+            --secondary-foreground: hsl(215 16% 47%);
+            --muted: hsl(210 40% 96%);
+            --muted-foreground: hsl(215 16% 47%);
+            --accent: hsl(142 71% 45%);
+            --accent-foreground: hsl(210 40% 98%);
+            --destructive: hsl(0 84% 60%);
+            --destructive-foreground: hsl(210 40% 98%);
+            --border: hsl(214 32% 91%);
+            --input: hsl(214 32% 91%);
+            --ring: hsl(221 83% 53%);
+            --chart-1: hsl(221 83% 53%);
+            --chart-2: hsl(142 71% 45%);
+            --chart-3: hsl(41 86% 83%);
+            --chart-4: hsl(0 84% 60%);
+            --chart-5: hsl(271 91% 65%);
+        }
+        
+        .watermark-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 20px,
+                rgba(37, 99, 235, 0.05) 20px,
+                rgba(37, 99, 235, 0.05) 40px
+            );
+            pointer-events: none;
+        }
+        
+        .premium-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            animation: premium-pulse 2s infinite;
+        }
+        
+        @keyframes premium-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+        }
+        
+        .step-progress {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .step-active {
+            background: linear-gradient(135deg, var(--primary), hsl(221 83% 60%));
+        }
+        
+        .step-completed {
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground font-sans">
+    <!-- Header -->
+    <header class="bg-card border-b border-border sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-alt text-primary-foreground text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-foreground">CVMaster Pro</h1>
+                        <p class="text-xs text-muted-foreground">AI-Powered CV Generation</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                        <i class="fas fa-shield-alt text-accent"></i>
+                        <span>256-bit SSL Secured</span>
+                    </div>
+                    <button class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        Help & Support
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Progress Steps -->
+        <!-- @COMPONENT: ProgressSteps [currentStep, totalSteps] -->
+        <div class="mb-12">
+            <div class="flex items-center justify-center space-x-8">
+                <!-- Step 1: Fill Form -->
+                <div class="flex flex-col items-center">
+                    <div class="step-progress step-active w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg mb-3">
+                        1
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm font-medium text-foreground">Fill Form</p>
+                        <p class="text-xs text-muted-foreground mt-1">Personal & Professional Info</p>
+                    </div>
+                </div>
+                
+                <!-- Connection Line -->
+                <div class="w-20 h-px bg-border"></div>
+                
+                <!-- Step 2: Processing -->
+                <div class="flex flex-col items-center">
+                    <div class="step-progress w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-semibold text-lg mb-3">
+                        2
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm font-medium text-muted-foreground">AI Processing</p>
+                        <p class="text-xs text-muted-foreground mt-1">Enhancement & Optimization</p>
+                    </div>
+                </div>
+                
+                <!-- Connection Line -->
+                <div class="w-20 h-px bg-border"></div>
+                
+                <!-- Step 3: Preview & Customize -->
+                <div class="flex flex-col items-center">
+                    <div class="step-progress w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-semibold text-lg mb-3">
+                        3
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm font-medium text-muted-foreground">Preview & Buy</p>
+                        <p class="text-xs text-muted-foreground mt-1">Customize & Purchase</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: ProgressSteps -->
+
+        <!-- Sub-Steps for Fill Form -->
+        <!-- @COMPONENT: SubSteps [currentSubStep, totalSubSteps] -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center space-x-6 bg-card rounded-lg p-4 shadow-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">
+                        ✓
+                    </div>
+                    <span class="text-sm font-medium text-foreground">Personal Info</span>
+                </div>
+                <div class="w-8 h-px bg-border"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">
+                        2
+                    </div>
+                    <span class="text-sm font-medium text-foreground">Experience</span>
+                </div>
+                <div class="w-8 h-px bg-border"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-medium">
+                        3
+                    </div>
+                    <span class="text-sm font-medium text-muted-foreground">Education</span>
+                </div>
+                <div class="w-8 h-px bg-border"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-medium">
+                        4
+                    </div>
+                    <span class="text-sm font-medium text-muted-foreground">Skills</span>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: SubSteps -->
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Input Methods -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Quick Start Options -->
+                <!-- @COMPONENT: InputMethods -->
+                <div class="bg-card rounded-lg border border-border p-6 shadow-sm">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-rocket text-primary"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-foreground">Quick Start Your CV</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- Upload JSON -->
+                        <div class="border-2 border-dashed border-border rounded-lg p-6 hover:border-primary/50 transition-colors cursor-pointer group" data-event="click:handleJSONUpload">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors">
+                                    <i class="fas fa-file-code text-accent text-xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-foreground mb-2">Upload JSON Data</h3>
+                                <p class="text-sm text-muted-foreground mb-3">Import existing CV data from JSON file</p>
+                                <div class="text-xs text-muted-foreground bg-muted rounded px-2 py-1 inline-block">
+                                    Supports .json format
+                                </div>
+                            </div>
+                            <!-- @FUNCTIONALITY: File upload handler for JSON format with validation -->
+                            <input type="file" accept=".json" class="hidden" data-implementation="JSON file parser and validator" />
+                        </div>
+                        
+                        <!-- Upload PDF with AI -->
+                        <div class="border-2 border-dashed border-border rounded-lg p-6 hover:border-primary/50 transition-colors cursor-pointer group relative" data-event="click:handlePDFUpload">
+                            <div class="premium-badge absolute -top-2 -right-2 text-xs text-white px-2 py-1 rounded-full font-medium">
+                                AI POWERED
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                                    <i class="fas fa-file-pdf text-primary text-xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-foreground mb-2">Upload Existing CV</h3>
+                                <p class="text-sm text-muted-foreground mb-3">AI will extract and enhance your data</p>
+                                <div class="text-xs text-muted-foreground bg-muted rounded px-2 py-1 inline-block">
+                                    Supports PDF format
+                                </div>
+                            </div>
+                            <!-- @FUNCTIONALITY: AI-powered PDF text extraction using OpenAI -->
+                            <input type="file" accept=".pdf" class="hidden" data-implementation="PDF upload with AI text extraction" />
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="inline-flex items-center space-x-2 text-sm text-muted-foreground mb-4">
+                            <span>or</span>
+                        </div>
+                        <button class="w-full bg-primary text-primary-foreground font-medium py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors" data-event="click:startManualEntry">
+                            Start Creating Manually
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: InputMethods -->
+
+                <!-- Experience Form Section -->
+                <!-- @COMPONENT: ExperienceForm [experiences, currentIndex] -->
+                <div class="bg-card rounded-lg border border-border p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-briefcase text-primary"></i>
+                            </div>
+                            <h2 class="text-xl font-semibold text-foreground">Work Experience</h2>
+                        </div>
+                        <button class="text-sm text-primary hover:text-primary/80 transition-colors" data-event="click:addExperience">
+                            <i class="fas fa-plus mr-1"></i> Add Experience
+                        </button>
+                    </div>
+                    
+                    <!-- Experience Entry -->
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Job Title</label>
+                                <input type="text" placeholder="e.g., Senior Software Engineer" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" data-bind="experience.jobTitle" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Company Name</label>
+                                <input type="text" placeholder="e.g., TechCorp Inc." class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" data-bind="experience.company" />
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Start Date</label>
+                                <input type="date" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" data-bind="experience.startDate" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">End Date</label>
+                                <input type="date" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" data-bind="experience.endDate" />
+                            </div>
+                            <div class="flex items-end">
+                                <label class="flex items-center space-x-2 text-sm">
+                                    <input type="checkbox" class="rounded border-input" data-bind="experience.isCurrent" />
+                                    <span class="text-foreground">Currently working here</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Description</label>
+                            <textarea rows="4" placeholder="Describe your responsibilities, achievements, and key contributions..." class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none" data-bind="experience.description"></textarea>
+                            <div class="flex items-center justify-between mt-2">
+                                <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                                    <i class="fas fa-magic text-accent"></i>
+                                    <span>AI will enhance your description</span>
+                                </div>
+                                <button class="text-xs text-primary hover:text-primary/80 transition-colors" data-event="click:enhanceDescription">
+                                    <i class="fas fa-wand-magic-sparkles mr-1"></i>
+                                    Enhance with AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ExperienceForm -->
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-between">
+                    <button class="px-6 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors" data-event="click:previousStep">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Previous
+                    </button>
+                    <button class="px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors" data-event="click:nextStep">
+                        Continue to Education
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Preview & Premium Features -->
+            <div class="space-y-6">
+                <!-- Live Preview -->
+                <!-- @COMPONENT: CVPreview [cvData, isWatermarked] -->
+                <div class="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+                    <div class="p-4 border-b border-border bg-muted/30">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-medium text-foreground">Live Preview</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-medium">
+                                    WATERMARKED
+                                </span>
+                                <button class="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                                    <i class="fas fa-expand-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative min-h-[400px] bg-white">
+                        <!-- Watermark Overlay -->
+                        <div class="watermark-overlay"></div>
+                        
+                        <!-- CV Preview Content -->
+                        <div class="p-6 text-gray-800 relative">
+                            <div class="text-center mb-6">
+                                <h1 class="text-2xl font-bold text-gray-900" data-bind="personalInfo.fullName">John Doe</h1>
+                                <p class="text-sm text-gray-600 mt-1" data-bind="personalInfo.title">Senior Software Engineer</p>
+                                <div class="flex items-center justify-center space-x-4 text-xs text-gray-500 mt-2">
+                                    <span data-bind="personalInfo.email">john.doe@email.com</span>
+                                    <span data-bind="personalInfo.phone">+1 (555) 123-4567</span>
+                                    <span data-bind="personalInfo.location">New York, NY</span>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h2 class="text-sm font-bold text-gray-800 border-b border-gray-200 pb-1 mb-2">EXPERIENCE</h2>
+                                    <div class="space-y-3">
+                                        <!-- @MAP: experiences.map(experience => ( -->
+                                        <div data-mock="true">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h3 class="text-sm font-semibold text-gray-800">Senior Software Engineer</h3>
+                                                    <p class="text-xs text-gray-600">TechCorp Inc.</p>
+                                                </div>
+                                                <span class="text-xs text-gray-500">2020 - Present</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 mt-1 leading-relaxed">Led development of cloud-native applications using React and Node.js...</p>
+                                        </div>
+                                        <!-- @END_MAP )) -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Watermark Text -->
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div class="text-primary/10 text-6xl font-bold transform rotate-45">
+                                PREVIEW
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: CVPreview -->
+
+                <!-- Premium Features -->
+                <!-- @COMPONENT: PremiumFeatures -->
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg border border-yellow-200 p-6">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="premium-badge w-8 h-8 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-crown text-white text-sm"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Premium Features</h3>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-check text-accent text-sm"></i>
+                            <span class="text-sm text-gray-700">50+ Professional Templates</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-check text-accent text-sm"></i>
+                            <span class="text-sm text-gray-700">Multi-language Support (15 languages)</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-check text-accent text-sm"></i>
+                            <span class="text-sm text-gray-700">AI Content Enhancement</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-check text-accent text-sm"></i>
+                            <span class="text-sm text-gray-700">Unlimited PDF Downloads</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-check text-accent text-sm"></i>
+                            <span class="text-sm text-gray-700">ATS Optimization</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-check text-accent text-sm"></i>
+                            <span class="text-sm text-gray-700">Custom Color Schemes</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-gray-800 mb-1">
+                            $9.99 <span class="text-sm font-normal text-gray-600">one-time</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mb-4">Lifetime access to all premium features</p>
+                        <button class="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-semibold py-3 px-6 rounded-lg hover:from-yellow-500 hover:to-orange-500 transition-all transform hover:scale-105" data-event="click:upgradeToPremium">
+                            <i class="fas fa-crown mr-2"></i>
+                            Upgrade to Premium
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: PremiumFeatures -->
+
+                <!-- Payment Security -->
+                <div class="bg-card rounded-lg border border-border p-4">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <i class="fas fa-shield-alt text-accent"></i>
+                        <h4 class="text-sm font-medium text-foreground">Secure Payment</h4>
+                    </div>
+                    <div class="flex items-center justify-center space-x-4 mb-3">
+                        <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=40" alt="Stripe" class="h-6" />
+                        <i class="fas fa-credit-card text-muted-foreground"></i>
+                        <i class="fab fa-cc-visa text-blue-600 text-xl"></i>
+                        <i class="fab fa-cc-mastercard text-red-500 text-xl"></i>
+                        <i class="fab fa-cc-paypal text-blue-500 text-xl"></i>
+                    </div>
+                    <p class="text-xs text-muted-foreground text-center">
+                        Your payment information is encrypted and secure
+                    </p>
+                </div>
+
+                <!-- AI Processing Status -->
+                <!-- @COMPONENT: ProcessingStatus [status, progress] -->
+                <div class="bg-card rounded-lg border border-border p-4" style="display: none;" data-show-when="processing">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <h4 class="text-sm font-medium text-foreground">AI Processing</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-muted-foreground">Analyzing content...</span>
+                            <span class="text-primary font-medium">45%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full transition-all" style="width: 45%"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ProcessingStatus -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-card border-t border-border mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file-alt text-primary-foreground"></i>
+                        </div>
+                        <span class="font-semibold text-foreground">CVMaster Pro</span>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                        AI-powered CV generation platform trusted by professionals worldwide.
+                    </p>
+                </div>
+                <div>
+                    <h5 class="font-medium text-foreground mb-3">Features</h5>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li>AI Enhancement</li>
+                        <li>Multi-language Support</li>
+                        <li>ATS Optimization</li>
+                        <li>Premium Templates</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-medium text-foreground mb-3">Support</h5>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li>Help Center</li>
+                        <li>Contact Us</li>
+                        <li>Privacy Policy</li>
+                        <li>Terms of Service</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-medium text-foreground mb-3">Security</h5>
+                    <div class="flex items-center space-x-2 text-sm text-muted-foreground mb-2">
+                        <i class="fas fa-lock text-accent"></i>
+                        <span>256-bit SSL Encryption</span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm text-muted-foreground mb-2">
+                        <i class="fas fa-shield-alt text-accent"></i>
+                        <span>GDPR Compliant</span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                        <i class="fas fa-certificate text-accent"></i>
+                        <span>SOC 2 Certified</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-border mt-8 pt-6 text-center">
+                <p class="text-sm text-muted-foreground">
+                    © 2024 CVMaster Pro. All rights reserved. Powered by AI technology.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            // Step navigation handler
+            const handleStepNavigation = (step) => {
+                // TODO: Implement step validation and progression logic
+                console.log('Navigating to step:', step);
+            };
+
+            // File upload handlers
+            const handleJSONUpload = (event) => {
+                // TODO: Implement JSON file parsing and validation
+                console.log('JSON upload triggered');
+            };
+
+            const handlePDFUpload = (event) => {
+                // TODO: Implement PDF upload and AI text extraction
+                console.log('PDF upload triggered');
+            };
+
+            // AI enhancement
+            const enhanceDescription = (text) => {
+                // TODO: Integrate with OpenAI API for content enhancement
+                console.log('Enhancing description with AI');
+            };
+
+            // Payment processing
+            const initializeStripe = () => {
+                // TODO: Initialize Stripe payment processing
+                console.log('Initializing Stripe payment system');
+            };
+
+            // Session management
+            const trackUserSession = () => {
+                // TODO: Implement session tracking for payment verification
+                console.log('Tracking user session for payment');
+            };
+
+            // Watermark removal after payment
+            const removeWatermark = () => {
+                // TODO: Remove watermark overlay after successful payment
+                console.log('Removing watermark after payment verification');
+            };
+
+            // Initialize the application
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeStripe();
+                trackUserSession();
+                
+                // Add event listeners for interactive elements
+                document.querySelectorAll('[data-event]').forEach(element => {
+                    const [eventType, handlerName] = element.getAttribute('data-event').split(':');
+                    element.addEventListener(eventType, function(e) {
+                        console.log(`Handling ${handlerName} event`);
+                        // TODO: Implement specific event handlers
+                    });
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
