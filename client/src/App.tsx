@@ -9,6 +9,7 @@ import CvBuilder from "@/pages/cv-builder";
 import Checkout from "@/pages/checkout";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import Navbar from "@/components/Navbar"; // ✅ Importa el Navbar
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -22,21 +23,26 @@ function Router() {
   }
 
   return (
-    <Switch>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/cv-builder" component={CvBuilder} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/cv-builder" component={CvBuilder} />
-        </>
-      )}
-      <Route path="/checkout/:sessionToken" component={Checkout} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      {/* Mostrar Navbar solo si el usuario está logueado */}
+      {isAuthenticated && <Navbar />}
+
+      <Switch>
+        {!isAuthenticated ? (
+          <>
+            <Route path="/" component={Landing} />
+            <Route path="/cv-builder" component={CvBuilder} />
+          </>
+        ) : (
+          <>
+            <Route path="/" component={Home} />
+            <Route path="/cv-builder" component={CvBuilder} />
+          </>
+        )}
+        <Route path="/checkout/:sessionToken" component={Checkout} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 
