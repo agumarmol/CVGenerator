@@ -12,13 +12,14 @@ import { cvDataSchema } from "@shared/schema";
 import { enhanceJobDescription, extractCvDataFromText, generatePersonalSummary } from "./services/ai";
 import { extractTextFromPDF, validatePDFFile } from "./services/pdf-parser";
 import { randomBytes } from "crypto";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-06-20",
+  apiVersion: "2024-06-20" as any,
 });
 
 const upload = multer({ 
@@ -27,6 +28,20 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
   
   // Create new CV session
   app.post("/api/cv-session", async (req, res) => {
@@ -173,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create payment intent for CV purchase
-  app.post("/api/create-payment-intent", async (req, res) => {
+  app.post("/api/create-payment-intent", isAuthenticated, async (req: any, res) => {
     try {
       const { sessionToken } = req.body;
       const amount = 999; // $9.99 in cents
@@ -212,7 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verify payment and unlock premium features
-  app.post("/api/verify-payment", async (req, res) => {
+  app.post("/api/verify-payment", isAuthenticated, async (req, res) => {
     try {
       const { paymentIntentId, sessionToken } = req.body;
       
@@ -243,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate final PDF (only for paid sessions)
-  app.post("/api/generate-pdf", async (req, res) => {
+  app.post("/api/generate-pdf", isAuthenticated, async (req, res) => {
     try {
       const { sessionToken } = req.body;
       

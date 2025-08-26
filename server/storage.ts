@@ -1,12 +1,11 @@
-import { type User, type InsertUser, type CvSession, type InsertCvSession, type Payment, type InsertPayment, type CvData } from "@shared/schema";
+import { type User, type UpsertUser, type CvSession, type InsertCvSession, type Payment, type InsertPayment, type CvData } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
+  // User operations
+  // (IMPORTANT) these user operations are mandatory for Replit Auth.
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  updateStripeCustomerId(userId: string, customerId: string): Promise<User>;
-  updateUserStripeInfo(userId: string, info: { customerId: string; subscriptionId: string }): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
   
   createCvSession(session: InsertCvSession): Promise<CvSession>;
   getCvSessionByToken(token: string): Promise<CvSession | undefined>;
@@ -26,45 +25,30 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      email: insertUser.email || null,
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
-    };
-    this.users.set(id, user);
-    return user;
-  }
-
-  async updateStripeCustomerId(userId: string, customerId: string): Promise<User> {
-    const user = this.users.get(userId);
-    if (!user) throw new Error("User not found");
-    
-    const updatedUser = { ...user, stripeCustomerId: customerId };
-    this.users.set(userId, updatedUser);
-    return updatedUser;
-  }
-
-  async updateUserStripeInfo(userId: string, info: { customerId: string; subscriptionId: string }): Promise<User> {
-    const user = this.users.get(userId);
-    if (!user) throw new Error("User not found");
-    
-    const updatedUser = { 
-      ...user, 
-      stripeCustomerId: info.customerId,
-      stripeSubscriptionId: info.subscriptionId 
-    };
-    this.users.set(userId, updatedUser);
-    return updatedUser;
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const existingUser = this.users.get(userData.id!);
+    if (existingUser) {
+      const updatedUser = {
+        ...existingUser,
+        ...userData,
+        updatedAt: new Date(),
+      };
+      this.users.set(userData.id!, updatedUser);
+      return updatedUser;
+    } else {
+      const id = userData.id || randomUUID();
+      const user: User = {
+        id,
+        email: userData.email || null,
+        firstName: userData.firstName || null,
+        lastName: userData.lastName || null,
+        profileImageUrl: userData.profileImageUrl || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.users.set(id, user);
+      return user;
+    }
   }
 
   async createCvSession(insertSession: InsertCvSession): Promise<CvSession> {
